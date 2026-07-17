@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Emergency Medicine Access</title>
+
+<style>
+body{
+  font-family: Arial;
+  background: linear-gradient(to right,#fbc2eb,#a6c1ee);
+}
+
+.container{
+  width:400px;
+  margin:80px auto;
+  background:white;
+  padding:20px;
+  border-radius:15px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+h2{
+  text-align:center;
+  color:#dc2626;
+}
+
+.item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px;
+  border:1px solid #ddd;
+  border-radius:10px;
+  margin:10px 0;
+}
+
+.btn{
+  padding:5px 10px;
+  background:#3b82f6;
+  color:white;
+  border:none;
+  border-radius:5px;
+  cursor:pointer;
+}
+
+.count{
+  margin:0 10px;
+}
+
+.get-btn{
+  width:100%;
+  padding:12px;
+  background:#dc2626;
+  color:white;
+  border:none;
+  border-radius:8px;
+  font-size:16px;
+  margin-top:15px;
+  cursor:pointer;
+}
+
+/* NEW LOGOUT BUTTON STYLE */
+.logout-btn{
+  width:100%;
+  padding:12px;
+  background:black;
+  color:white;
+  border:none;
+  border-radius:8px;
+  font-size:16px;
+  margin-top:10px;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>🚨 Emergency Medicine Access</h2>
+
+  <!-- Paracetamol -->
+  <div class="item">
+    <span>Paracetamol</span>
+    <div>
+      <button class="btn" onclick="updateQty('Paracetamol',-1)">-</button>
+      <span id="Paracetamol" class="count">0</span>
+      <button class="btn" onclick="updateQty('Paracetamol',1)">+</button>
+    </div>
+  </div>
+
+  <!-- Cetirizine -->
+  <div class="item">
+    <span>Cetirizine</span>
+    <div>
+      <button class="btn" onclick="updateQty('Cetirizine',-1)">-</button>
+      <span id="Cetirizine" class="count">0</span>
+      <button class="btn" onclick="updateQty('Cetirizine',1)">+</button>
+    </div>
+  </div>
+
+  <!-- GET MEDICINE -->
+  <button class="get-btn" onclick="getMedicine()">🚨 Get Medicine</button>
+
+  <!-- ✅ LOGOUT BUTTON ADDED -->
+  <button class="logout-btn" onclick="logout()">Logout</button>
+
+</div>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+
+// 🔥 FIREBASE CONFIG
+const firebaseConfig = {
+ apiKey: "AIzaSyCygnTLWHYHXauMRfJGqqstWc1BayhcN9Q",
+  authDomain: "smartpillcom.firebaseapp.com",
+  databaseURL: "https://smartpillcom-default-rtdb.firebaseio.com",
+  projectId: "smartpillcom",
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.database();
+
+// 🧠 STORE COUNTS
+let cart = {
+  Paracetamol: 0,
+  Cetirizine: 0
+};
+
+// ➕➖ UPDATE QUANTITY
+function updateQty(name, val){
+  cart[name] += val;
+  if(cart[name] < 0) cart[name] = 0;
+  document.getElementById(name).innerText = cart[name];
+}
+
+// 🚨 EMERGENCY LOGIN + DISPENSE
+async function getMedicine(){
+
+  const email = prompt("Enter Emergency Email:");
+  const password = prompt("Enter Password:");
+
+  if(!email || !password){
+    alert("Enter credentials");
+    return;
+  }
+
+  try{
+
+    // 🔐 LOGIN
+    await auth.signInWithEmailAndPassword(email,password);
+
+    if(email !== "emergency@gmail.com"){
+      alert("❌ Not authorized");
+      return;
+    }
+
+    // 📦 SELECT MEDICINE
+    let medicine = "";
+    let qty = 0;
+
+    if(cart.Paracetamol > 0){
+      medicine = "Paracetamol";
+      qty = cart.Paracetamol;
+    }
+    else if(cart.Cetirizine > 0){
+      medicine = "Cetirizine";
+      qty = cart.Cetirizine;
+    }
+
+    if(qty === 0){
+      alert("Select medicine first");
+      return;
+    }
+
+    // 🔥 SEND TO FIREBASE
+    await db.ref("dispense").set({
+      medicine: medicine,
+      quantity: qty,
+      status: "pending",
+      type: "emergency",
+      time: new Date().toLocaleString()
+    });
+
+    alert("✅ Medicine Sent to Machine");
+
+  }catch(err){
+    alert("❌ " + err.message);
+  }
+
+}
+
+// 🔓 LOGOUT FUNCTION (ADDED)
+function logout(){
+  auth.signOut()
+  .then(()=>{
+    window.location = "login.html"; // redirect to login page
+  })
+  .catch(err=>{
+    alert(err.message);
+  });
+}
+
+</script>
+
+</body>
+</html>

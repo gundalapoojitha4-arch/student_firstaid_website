@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Smart First-Aid Vending System | Login</title>
+
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background: linear-gradient(to right,#4facfe,#00f2fe);
+}
+
+.box{
+  width:360px;
+  margin:100px auto;
+  background:#fff;
+  padding:25px;
+  border-radius:10px;
+  text-align:center;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+.roles{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:15px;
+}
+
+.role{
+  width:32%;
+  padding:10px;
+  border:1px solid #ccc;
+  cursor:pointer;
+  border-radius:5px;
+  font-size:14px;
+}
+
+.active{
+  background:#4facfe;
+  color:white;
+  border:none;
+}
+
+input,button{
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+}
+
+.login-btn{
+  background:#4facfe;
+  color:white;
+  border:none;
+  font-size:16px;
+  cursor:pointer;
+}
+
+.emergency-btn{
+  background:#dc2626;
+  color:white;
+  border:none;
+  font-size:16px;
+  cursor:pointer;
+}
+
+#error{
+  color:red;
+  font-size:14px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+  <h2>Smart First-Aid System</h2>
+
+  <!-- ROLE SELECT -->
+  <div class="roles">
+    <div class="role active" onclick="selectRole('admin',event)">Admin</div>
+    <div class="role" onclick="selectRole('mentor',event)">Faculty</div>
+    <div class="role" onclick="selectRole('student',event)">Student</div>
+  </div>
+
+  <!-- INPUTS -->
+  <input type="email" id="email" placeholder="Email" required>
+  <input type="password" id="password" placeholder="Password" required>
+
+  <!-- LOGIN -->
+  <button class="login-btn" onclick="login()">Login</button>
+
+  <!-- 🚨 EMERGENCY ACCESS (BEST VERSION) -->
+  <a href="emergency.html">
+    <button class="emergency-btn" onclick="goEmergency()">🚨 Emergency Access</button>
+  </a>
+
+  <p id="error"></p>
+</div>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+
+// FIREBASE CONFIG
+const firebaseConfig = {
+  apiKey: "AIzaSyCygnTLWHYHXauMRfJGqqstWc1BayhcN9Q",
+  authDomain: "smartpillcom.firebaseapp.com",
+  databaseURL: "https://smartpillcom-default-rtdb.firebaseio.com",
+  projectId: "smartpillcom",
+  storageBucket: "smartpillcom.firebasestorage.app",
+  messagingSenderId: "58968436483",
+  appId: "1:58968436483:web:ed57bac2375cc895898336",
+  measurementId: "G-5Z0MCT5C04"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+
+// DEFAULT ROLE
+let selectedRole = "admin";
+
+// ROLE SELECT
+function selectRole(role,e){
+  selectedRole = role;
+  document.querySelectorAll(".role").forEach(r=>r.classList.remove("active"));
+  e.target.classList.add("active");
+}
+
+// LOGIN FUNCTION
+async function login(){
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const error = document.getElementById("error");
+
+  error.innerText = "";
+
+  try{
+    const userCred = await auth.signInWithEmailAndPassword(email,password);
+    const uid = userCred.user.uid;
+
+    const snapshot = await db.ref("users/"+uid+"/role").get();
+    const role = snapshot.val();
+
+    if(role !== selectedRole){
+      error.innerText = "❌ Wrong role selected!";
+      return;
+    }
+
+    if(role==="admin") window.location="admin.html";
+    if(role==="mentor") window.location="mentor.html";
+    if(role==="student") window.location="student.html";
+
+  }catch(err){
+    error.innerText = err.message;
+  }
+}
+
+// EXTRA SAFETY FUNCTION
+function goEmergency(){
+  window.location = "emergency.html";
+}
+
+</script>
+
+</body>
+</html>

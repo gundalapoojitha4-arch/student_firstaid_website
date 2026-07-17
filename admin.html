@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Portal | First Aid System</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+body{
+  background:#e5e7eb;
+  font-family:Segoe UI, sans-serif;
+}
+.sidebar{
+  width:230px;
+  min-height:100vh;
+  background:#1f2937;
+  position:fixed;
+}
+.sidebar h4{ color:white; }
+.sidebar a{
+  color:white;
+  display:block;
+  padding:15px;
+  text-decoration:none;
+  cursor:pointer;
+}
+.sidebar a:hover,
+.sidebar a.active{
+  background:#2563eb;
+}
+.main{ margin-left:230px; }
+.topbar{
+  height:60px;
+  background:white;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:0 20px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+.content{ padding:20px; }
+.card-box{
+  background:white;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 6px 15px rgba(0,0,0,0.1);
+  margin-bottom:20px;
+}
+.logout-btn{
+  background:#dc2626;
+  color:white;
+  border:none;
+  padding:8px 16px;
+  border-radius:5px;
+}
+.hidden{ display:none; }
+
+/* 🔥 MEDICINE GRID */
+.medicine-grid{
+  display:flex;
+  gap:30px;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+
+/* 🔥 CARD */
+.medicine-card{
+  width:45%;
+  border-radius:20px;
+  overflow:hidden;
+  transition:0.3s;
+  background:linear-gradient(135deg,#f0f4ff,#dbeafe);
+  box-shadow:0 8px 25px rgba(37,99,235,0.2);
+  text-align:center;
+}
+.medicine-card:hover{
+  transform:translateY(-8px) scale(1.02);
+  box-shadow:0 15px 35px rgba(37,99,235,0.3);
+}
+
+/* IMAGE */
+.med-img{
+  width:100%;
+  height:260px;
+  object-fit:contain;
+  padding:15px;
+  background:white;
+}
+
+/* TEXT */
+.med-title{
+  font-size:20px;
+  font-weight:bold;
+  color:#1e3a8a;
+}
+.med-price{
+  color:#2563eb;
+  font-weight:bold;
+  font-size:18px;
+  margin-bottom:10px;
+}
+
+/* QTY */
+.qty-box{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:10px;
+  margin-bottom:15px;
+}
+.qty-btn{
+  background:#2563eb;
+  color:white;
+  border:none;
+  padding:6px 12px;
+  font-weight:bold;
+  border-radius:6px;
+}
+.qty{
+  font-weight:bold;
+  font-size:18px;
+}
+
+/* BUTTON */
+.buy-btn{
+  background:#2563eb;
+  color:white;
+  border:none;
+  width:100%;
+  padding:14px;
+  font-size:18px;
+  border-radius:12px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+  <h4 class="text-center py-3">Admin</h4>
+  <a class="active" onclick="showSection('dashboard',this)">Dashboard</a>
+  <a onclick="showSection('logs',this)">Transaction Logs</a>
+  <a onclick="showSection('buy',this)">Buy Medicines</a>
+</div>
+
+<div class="main">
+
+  <div class="topbar">
+    <h5>First Aid Admin Portal</h5>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div id="dashboard">
+      <h4>System Overview</h4>
+      <div class="row mt-3">
+        <div class="col-md-4">
+          <div class="card-box text-center">
+            <h6>Total Transactions</h6>
+            <h2 id="totalTx">0</h2>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card-box text-center">
+            <h6>Total Users</h6>
+            <h2 id="totalStudents">0</h2>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card-box text-center">
+            <h6>Total Amount</h6>
+            <h2 id="totalAmount">₹0</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BUY SECTION -->
+    <div id="buy" class="hidden">
+
+      <div class="card-box">
+        <h5>Admin Details</h5>
+        <input id="adminName" class="form-control mb-2" placeholder="Enter Admin Name">
+        <input id="adminReg" class="form-control" placeholder="Enter Admin ID">
+      </div>
+
+      <div class="card-box">
+        <h5 class="text-center mb-4">Select Medicines</h5>
+
+        <div class="medicine-grid">
+
+          <!-- Paracetamol -->
+          <div class="medicine-card">
+            <img src="paracetamol.jpg" class="med-img">
+            <div class="med-body">
+              <div class="med-title">Paracetamol</div>
+              <div class="med-price">₹15</div>
+
+              <div class="qty-box">
+                <button class="qty-btn" onclick="changeQty('paracetamol',-1)">-</button>
+                <span class="qty" id="paracetamol">0</span>
+                <button class="qty-btn" onclick="changeQty('paracetamol',1)">+</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cetirizine -->
+          <div class="medicine-card">
+            <img src="cetirizine.jpg" class="med-img">
+            <div class="med-body">
+              <div class="med-title">Cetirizine</div>
+              <div class="med-price">₹20</div>
+
+              <div class="qty-box">
+                <button class="qty-btn" onclick="changeQty('cetirizine',-1)">-</button>
+                <span class="qty" id="cetirizine">0</span>
+                <button class="qty-btn" onclick="changeQty('cetirizine',1)">+</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <button class="buy-btn mt-4" onclick="buyAdminItems()">Buy Now</button>
+        <div id="adminMsg" class="mt-3"></div>
+      </div>
+
+    </div>
+
+    <!-- LOGS -->
+    <div id="logs" class="hidden">
+      <h4>Transaction Logs</h4>
+      <div class="card-box mt-3">
+        <table class="table table-bordered">
+          <thead class="table-primary">
+            <tr>
+              <th>User</th>
+              <th>ID</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody id="logTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCygnTLWHYHXauMRfJGqqstWc1BayhcN9Q",
+  authDomain: "smartpillcom.firebaseapp.com",
+  databaseURL: "https://smartpillcom-default-rtdb.firebaseio.com",
+  projectId: "smartpillcom"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+/* ✅ ONLY 2 MEDICINES */
+const medicines = {
+  paracetamol:{price:15,name:"Paracetamol"},
+  cetirizine:{price:20,name:"Cetirizine"}
+};
+
+function changeQty(id,val){
+  let el=document.getElementById(id);
+  let q=parseInt(el.innerText)+val;
+  if(q>=0) el.innerText=q;
+}
+
+function buyAdminItems(){
+  let name=adminName.value.trim();
+  let reg=adminReg.value.trim();
+
+  if(!name||!reg){
+    alert("Enter admin details");
+    return;
+  }
+
+  let items=[], total=0;
+
+  for(let id in medicines){
+    let qty=parseInt(document.getElementById(id).innerText);
+    if(qty>0){
+      items.push({name:medicines[id].name,qty});
+      total+=qty*medicines[id].price;
+    }
+  }
+
+  if(items.length===0){
+    alert("Select at least one medicine");
+    return;
+  }
+
+  db.ref("transactions").push({
+    admin:name,
+    adminId:reg,
+    items,
+    total,
+    time:new Date().toLocaleString(),
+    role:"admin"
+  });
+
+  adminMsg.innerHTML=`<div class="alert alert-success">✅ Purchase Successful | ₹${total}</div>`;
+}
+
+function showSection(id,el){
+  document.querySelectorAll('.content > div').forEach(d=>d.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  document.querySelectorAll('.sidebar a').forEach(a=>a.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function logout(){
+  window.location="login.html";
+}
+</script>
+
+</body>
+</html>
